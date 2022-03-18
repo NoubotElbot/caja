@@ -18,6 +18,7 @@ class CreateProductsTable extends Migration
             $table->string('name');
             $table->unsignedBigInteger('price');
             $table->unsignedInteger('stock');
+            $table->string('image')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

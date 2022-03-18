@@ -23,7 +23,7 @@
     @auth
         <nav class="navbar navbar-dark navbar-theme-primary px-4 col-12 d-lg-none">
             <a class="navbar-brand me-lg-5" href="/">
-                <img class="navbar-brand-dark" src="../../assets/img/brand/light.svg" alt="Volt logo" />
+                {{-- <img class="navbar-brand-dark" src="../../assets/img/brand/light.svg" alt="Volt logo" /> --}}
             </a>
             <div class="d-flex align-items-center">
                 <button class="navbar-toggler d-lg-none collapsed" type="button" data-bs-toggle="collapse"
@@ -84,7 +84,10 @@
                             <span class="mt-1 ms-1 sidebar-text">Caja</span>
                         </a>
                     </li>
-                    <li @class(['nav-item', 'active' => true])>
+                    <li @class([
+                        'nav-item',
+                        'active' => ($view ?? null) == 'productos',
+                    ])>
                         <a href="{{ route('productos.index') }}" class="nav-link">
                             <span class="sidebar-icon">
                                 <i class="fas fa-boxes"></i>
@@ -123,7 +126,7 @@
 @else
 container @endauth">
         @auth
-            <nav class="navbar navbar-top navbar-expand navbar-dashboard navbar-dark ps-0 pe-2 pb-0">
+            <nav class="d-none d-lg-block navbar navbar-top navbar-expand navbar-dashboard navbar-dark ps-0 pe-2 pb-0">
                 <div class="container-fluid px-0">
                     <div class="d-flex justify-content-end w-100" id="navbarSupportedContent">
                         <!-- Navbar links -->

@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Sale;
 use App\Http\Requests\StoreSaleRequest;
 use App\Http\Requests\UpdateSaleRequest;
+use App\Models\Product;
+use Illuminate\Support\Facades\Auth;
 
 class SaleController extends Controller
 {
@@ -15,7 +17,8 @@ class SaleController extends Controller
      */
     public function index()
     {
-        //
+        $sales = Sale::paginate();
+        return view('sales.index', compact('sales'))->with(['view' => 'sales']);
     }
 
     /**
@@ -25,7 +28,8 @@ class SaleController extends Controller
      */
     public function create()
     {
-        //
+        $products = Product::where('stock', '>', 0)->get();
+        return view('sales.create', compact('products'))->with(['view' => 'sales']);
     }
 
     /**
@@ -36,7 +40,27 @@ class SaleController extends Controller
      */
     public function store(StoreSaleRequest $request)
     {
-        //
+        $total = 0;
+        $products = [];
+        foreach ($request->venta as $product) {
+            if ($product["product_count"] > 0) {
+                $total += $product["product_count"] * $product["price"];
+                $products[$product["product_id"]] = [
+                    'sale_price' => $product["price"],
+                    'quantity' => $product["product_count"]
+                ];
+            }
+        }
+        $sale = Sale::create([
+            'user_id' => Auth::id(),
+            'total' => $total,
+            'cash' => 0,
+            // 'discount' => 0
+        ]);
+
+        $sale->products()->attach($products);
+
+        return response()->json($sale->load('products'));
     }
 
     /**

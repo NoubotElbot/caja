@@ -13,7 +13,7 @@ class StoreSaleRequest extends FormRequest
      */
     public function authorize()
     {
-        return false;
+        return true;
     }
 
     /**
@@ -24,7 +24,10 @@ class StoreSaleRequest extends FormRequest
     public function rules()
     {
         return [
-            //
+            'venta' => 'required|array',
+            'venta.*.product_id' => 'present',
+            'venta.*.price' => 'present',
+            'venta.*.product_count' => 'present',
         ];
     }
 }

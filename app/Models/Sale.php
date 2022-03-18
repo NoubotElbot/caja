@@ -8,4 +8,17 @@ use Illuminate\Database\Eloquent\Model;
 class Sale extends Model
 {
     use HasFactory;
+
+    public $timestamps = false;
+    protected $fillable = [
+        'user_id',
+        'total',
+        'cash',
+        'discount'
+    ];
+
+    public function products()
+    {
+        return $this->belongsToMany(Product::class);
+    }
 }
