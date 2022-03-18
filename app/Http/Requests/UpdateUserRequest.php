@@ -3,6 +3,9 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password;
 
 class UpdateUserRequest extends FormRequest
 {
@@ -13,7 +16,8 @@ class UpdateUserRequest extends FormRequest
      */
     public function authorize()
     {
-        return false;
+        $user = Auth::user();
+        return $user->hasRole('Super Admin') || $user->id === $this->user->id;
     }
 
     /**
@@ -23,8 +27,18 @@ class UpdateUserRequest extends FormRequest
      */
     public function rules()
     {
-        return [
-            //
+        return  [
+            'name' => 'required|min:1',
+            'username' => ['required', 'string', Rule::unique('users', 'username')->ignore($this->user)],
+            'email' => ['required', 'email', Rule::unique('users', 'email')->ignore($this->user)],
+            'password' => [
+                'nullable',
+                'string',
+                'confirmed',
+                Password::min(8)
+                    ->letters()
+                    ->numbers()
+            ]
         ];
     }
 }

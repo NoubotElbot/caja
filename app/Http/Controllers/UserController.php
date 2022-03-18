@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
+use Illuminate\Support\Facades\Auth;
+use Spatie\Permission\Models\Role;
 
 class UserController extends Controller
 {
@@ -15,7 +17,8 @@ class UserController extends Controller
      */
     public function index()
     {
-        //
+        $users = User::paginate();
+        return view('users.index', compact('users'))->with(['view' => 'usuarios']);
     }
 
     /**
@@ -25,7 +28,8 @@ class UserController extends Controller
      */
     public function create()
     {
-        //
+        $roles = Auth::user()->hasRole('Super Admin') ? Role::get() : Role::where('name', '!=', 'Super Admin')->get();
+        return view('users.create', compact('roles'))->with(['view' => 'usuarios']);
     }
 
     /**
@@ -36,7 +40,23 @@ class UserController extends Controller
      */
     public function store(StoreUserRequest $request)
     {
-        //
+        $user = User::create([
+            'name' => $request->name,
+            'username' => $request->username,
+            'email' => $request->email,
+            'password' => bcrypt($request->password),
+        ]);
+
+        $user->syncRoles($request->role);
+
+        return redirect()->route('usuarios.show', $user)->with([
+            'alert' => [
+                "type" => "success",
+                "message" => "Usuario #$user->id creado con exito.",
+                "icon" => "success"
+            ],
+            'view' => 'usuarios'
+        ]);
     }
 
     /**
@@ -47,7 +67,7 @@ class UserController extends Controller
      */
     public function show(User $user)
     {
-        //
+        return view('users.show', compact('user'))->with(['view' => 'usuarios']);
     }
 
     /**
@@ -58,7 +78,8 @@ class UserController extends Controller
      */
     public function edit(User $user)
     {
-        //
+        $roles = Auth::user()->hasRole('Super Admin') ? Role::get() : Role::where('name', '!=', 'Super Admin')->get();
+        return view('users.edit', compact('user', 'roles'))->with(['view' => 'usuarios']);
     }
 
     /**
@@ -70,7 +91,27 @@ class UserController extends Controller
      */
     public function update(UpdateUserRequest $request, User $user)
     {
-        //
+        $data = [
+            'name' => $request->name,
+            'username' => $request->username,
+            'email' => $request->email,
+        ];
+
+        if ($request->has('password')) {
+            $data['password'] = bcrypt($request->password);
+        }
+        $user->syncRoles($request->role);
+
+        $user->update($data);
+
+        return redirect()->route('usuarios.show', $user)->with([
+            'alert' => [
+                "type" => "success",
+                "message" => "Usuario #$user->id modificado con exito.",
+                "icon" => "success"
+            ],
+            'view' => 'usuarios'
+        ]);
     }
 
     /**
@@ -81,6 +122,14 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
-        //
+        $user->delete();
+        return redirect()->route('usuarios.index')->with([
+            'alert' => [
+                "type" => "success",
+                "message" => "Usuario #$user->id eliminado con exito.",
+                "icon" => "success"
+            ],
+            'view' => 'usuarios'
+        ]);
     }
 }
