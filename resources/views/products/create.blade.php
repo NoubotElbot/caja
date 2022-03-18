@@ -16,7 +16,7 @@
                         </div>
                     </div>
                     <div class="card-body">
-                        <form action="{{ route('productos.store') }}" method="POST">
+                        <form action="{{ route('productos.store') }}" method="POST" enctype="multipart/form-data">
                             @csrf
                             <div class="row">
                                 <div class="col-12 mb-2">
@@ -34,8 +34,8 @@
                             <div class="row">
                                 <div class="col-12 col-md-6 mb-2">
                                     <label for="price">Precio</label>
-                                    <input type="number" class="form-control @error('price') is-invalid @enderror" id="price"
-                                        name="price" placeholder="Ingrese precio.." min="1" step="1"
+                                    <input type="number" class="form-control @error('price') is-invalid @enderror"
+                                        id="price" name="price" placeholder="Ingrese precio.." min="1" step="1"
                                         value="{{ old('price') }}">
                                     @error('price')
                                         <div class="invalid-feedback">
@@ -45,14 +45,28 @@
                                 </div>
                                 <div class="col-12 col-md-6 mb-2">
                                     <label for="stock">Stock</label>
-                                    <input type="number" class="form-control @error('stock') is-invalid @enderror" id="stock" name="stock"
-                                        placeholder="Ingrese Stock actual del producto..." min="0" step="1"
-                                        value="{{ old('stock') }}">
-                                        @error('stock')
+                                    <input type="number" class="form-control @error('stock') is-invalid @enderror"
+                                        id="stock" name="stock" placeholder="Ingrese Stock actual del producto..." min="0"
+                                        step="1" value="{{ old('stock') }}">
+                                    @error('stock')
                                         <div class="invalid-feedback">
                                             {{ $message }}
                                         </div>
                                     @enderror
+                                </div>
+                                <div class="col-12 col-md-6 mb-2">
+                                    <label for="image">Imagen</label>
+                                    <input type="file" class="form-control @error('image') is-invalid @enderror" id="image"
+                                        name="image">
+                                    @error('image')
+                                        <div class="invalid-feedback">
+                                            {{ $message }}
+                                        </div>
+                                    @enderror
+                                </div>
+                                <div class="col-12 col-md-6 mb-2">
+                                    <img src="{{ asset('img/no-image.png') }}" width="120" height="120" id="preview"
+                                        style="object-fit: cover">
                                 </div>
                             </div>
                             <div class="text-start mt-2">
@@ -64,4 +78,19 @@
             </div>
         </div>
     </div>
+@endsection
+@section('scripts')
+    <script type="text/javascript">
+        const input = document.querySelector('#image');
+        input.addEventListener('change', function() {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    document.querySelector('#preview').setAttribute('src', e.target
+                        .result); // Renderizamos la imagen
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        });
+    </script>
 @endsection

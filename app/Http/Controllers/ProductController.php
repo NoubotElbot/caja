@@ -6,6 +6,9 @@ use App\Models\Product;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Intervention\Image\Facades\Image;
 
 class ProductController extends Controller
 {
@@ -14,8 +17,11 @@ class ProductController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
+        if ($request->expectsJson()) {
+            return response()->json(Product::where('stock', '>', 0)->get());
+        }
         $products = Product::paginate();
         return view('products.index', compact('products'))->with(['view' => 'productos']);
     }
@@ -38,11 +44,29 @@ class ProductController extends Controller
      */
     public function store(StoreProductRequest $request)
     {
-        $product = Product::create([
+        $data = [
             'name' => $request->name,
             'price' => $request->price,
             'stock' => $request->stock,
-        ]);
+        ];
+
+        if ($request->hasFile('image')) {
+            $image      = $request->file('image');
+            $fileName   = time() . '.' . $image->getClientOriginalExtension();
+
+            $img = Image::make($image->getRealPath());
+            $img->resize(120, 120, function ($constraint) {
+                $constraint->aspectRatio();
+            });
+
+            $img->stream(); // <-- Key point
+            //dd();
+            $path = '/products' . '/' . $fileName;
+            Storage::put('/public' . $path, $img);
+            $data['image'] = $path;
+        }
+
+        $product = Product::create($data);
 
         return redirect()->route('productos.show', $product)->with([
             'alert' => [
@@ -89,11 +113,30 @@ class ProductController extends Controller
      */
     public function update(UpdateProductRequest $request, Product $product)
     {
-        $product->update([
+        $data = [
             'name' => $request->name,
             'price' => $request->price,
             'stock' => $request->stock,
-        ]);
+        ];
+
+        if ($request->hasFile('image')) {
+            Storage::delete('public/' . $product->image);
+            $image      = $request->file('image');
+            $fileName   = time() . '.' . $image->getClientOriginalExtension();
+
+            $img = Image::make($image->getRealPath());
+            $img->resize(120, 120, function ($constraint) {
+                $constraint->aspectRatio();
+            });
+
+            $img->stream(); // <-- Key point
+            //dd();
+            $path = '/products' . '/' . $fileName;
+            Storage::put('/public' . $path, $img);
+            $data['image'] = $path;
+        }
+
+        $product->update($data);
 
         return redirect()->route('productos.show', $product)->with([
             'alert' => [
