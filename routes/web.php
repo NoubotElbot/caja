@@ -4,6 +4,9 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\Auth\VerificationController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\SaleController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -29,17 +32,19 @@ Route::post('logout', [LoginController::class, 'logout'])->name('logout');
 // Route::post('register', [RegisterController::class, 'register']);
 
 // Password Reset Routes...
-Route::post('password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
-Route::get('password/reset', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
-Route::post('password/reset', [ResetPasswordController::class, 'reset'])->name('password.update');
-Route::get('password/reset/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
+// Route::post('password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+// Route::get('password/reset', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+// Route::post('password/reset', [ResetPasswordController::class, 'reset'])->name('password.update');
+// Route::get('password/reset/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
 
 // Email verification
-Route::post('email/resend', [VerificationController::class, 'resend'])->name('verification.resend');
-Route::get('email/verify', [VerificationController::class, 'show'])->name('verification.notice');
-Route::get('email/verify/{id}/{hash}', [VerificationController::class, 'verify'])->name('verification.verify');
+// Route::post('email/resend', [VerificationController::class, 'resend'])->name('verification.resend');
+// Route::get('email/verify', [VerificationController::class, 'show'])->name('verification.notice');
+// Route::get('email/verify/{id}/{hash}', [VerificationController::class, 'verify'])->name('verification.verify');
 Route::middleware(['auth'])->group(function () {
-
+    Route::resource('productos', ProductController::class)->parameters(['productos' => 'product']);
+    Route::resource('usuarios', UserController::class)->parameters(['usuarios' => 'user']);
+    Route::resource('ventas', SaleController::class)->parameters(['ventas' => 'sale']);
 });
 
 Route::get('/', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
